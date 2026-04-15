@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sitcom Trivia — Are You a True Fan?</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;800;900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg:      #1a1a2e;
+      --bg-alt:  #16213e;
+      --card:    #0f3460;
+      --red:     #e94560;
+      --gold:    #f5c518;
+      --green:   #4caf82;
+      --muted:   #a0a0b0;
+      --text:    #eaeaea;
+      --font-d:  'Bebas Neue', Impact, sans-serif;
+      --font-b:  'Nunito', Arial, sans-serif;
+      --font-m:  'Courier Prime', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-b);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      width: 100%;
+      background: rgba(15,15,35,0.97);
+      border-bottom: 2px solid var(--red);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 {
+      font-family: var(--font-d);
+      font-size: 1.8rem;
+      letter-spacing: 3px;
+      color: var(--gold);
+    }
+
+    header a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    header a:hover { color: var(--text); }
+
+    main {
+      width: 100%;
+      max-width: 720px;
+      padding: 3rem 1.5rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    /* Intro */
+    #intro {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    #intro h2 {
+      font-family: var(--font-d);
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      letter-spacing: 3px;
+      color: var(--text);
+      line-height: 1;
+    }
+
+    #intro h2 span { color: var(--gold); }
+
+    #intro p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      max-width: 480px;
+    }
+
+    .show-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+      margin-top: 0.5rem;
+    }
+
+    .show-chip {
+      padding: 0.5rem 1.1rem;
+      border: 2px solid var(--card);
+      border-radius: 30px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .show-chip.selected {
+      background: var(--red);
+      border-color: var(--red);
+      color: white;
+    }
+
+    .show-chip:hover { border-color: var(--red); color: var(--text); }
+
+    .diff-row {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .diff-btn {
+      padding: 0.5rem 1.25rem;
+      border-radius: 30px;
+      border: 2px solid var(--card);
+      background: transparent;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .diff-btn.active {
+      background: var(--gold);
+      border-color: var(--gold);
+      color: #111;
+    }
+
+    .btn-primary {
+      padding: 0.85rem 2.5rem;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-family: var(--font-d);
+      font-size: 1.3rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+
+    .btn-primary:hover:not(:disabled) { background: #c73550; transform: translateY(-2px); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Quiz */
+    #quiz { width: 100%; display: none; flex-direction: column; gap: 1.5rem; }
+
+    .progress-bar-wrap {
+      width: 100%;
+      height: 6px;
+      background: var(--card);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--red);
+      transition: width 0.4s;
+    }
+
+    .quiz-meta {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-m);
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .question-card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 2rem;
+      border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .question-label {
+      font-family: var(--font-m);
+      font-size: 0.75rem;
+      letter-spacing: 2px;
+      color: var(--red);
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .question-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .answers-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 500px) { .answers-grid { grid-template-columns: 1fr; } }
+
+    .answer-btn {
+      padding: 0.9rem 1rem;
+      background: var(--bg-alt);
+      border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font-b);
+      font-size: 0.98rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.15s;
+      line-height: 1.3;
+    }
+
+    .answer-btn:hover:not(:disabled) {
+      border-color: var(--gold);
+      background: rgba(245,197,24,0.07);
+    }
+
+    .answer-btn.correct {
+      background: rgba(76,175,130,0.2);
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    .answer-btn.wrong {
+      background: rgba(233,69,96,0.2);
+      border-color: var(--red);
+      color: var(--red);
+    }
+
+    .feedback-box {
+      padding: 1rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .feedback-box.show { display: block; }
+    .feedback-box.correct { background: rgba(76,175,130,0.15); border: 1px solid var(--green); color: var(--green); }
+    .feedback-box.wrong   { background: rgba(233,69,96,0.15);  border: 1px solid var(--red);   color: #ff8fa0; }
+
+    /* Results */
+    #results {
+      display: none;
+      text-align: center;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+
+    #results h2 {
+      font-family: var(--font-d);
+      font-size: clamp(2rem, 7vw, 3.5rem);
+      letter-spacing: 3px;
+      color: var(--text);
+    }
+
+    .score-display {
+      font-family: var(--font-d);
+      font-size: clamp(3.5rem, 14vw, 7rem);
+      color: var(--gold);
+      line-height: 1;
+    }
+
+    .score-label { color: var(--muted); font-size: 1rem; }
+
+    .verdict {
+      font-size: 1.15rem;
+      color: var(--text);
+      max-width: 460px;
+      line-height: 1.5;
+    }
+
+    .results-btn-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-secondary {
+      padding: 0.75rem 2rem;
+      background: transparent;
+      border: 2px solid var(--gold);
+      color: var(--gold);
+      border-radius: 30px;
+      font-family: var(--font-d);
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .btn-secondary:hover { background: var(--gold); color: #111; }
+
+    footer {
+      width: 100%;
+      text-align: center;
+      padding: 1.5rem;
+      font-family: var(--font-m);
+      font-size: 0.8rem;
+      color: var(--muted);
+      border-top: 1px solid rgba(255,255,255,0.07);
+    }
+
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>📺 Sitcom Trivia</h1>
+    <a href="scratch.html">← Back to Sitcom Central</a>
+  </header>
+
+  <main>
+
+    <!-- INTRO SCREEN -->
+    <div id="intro">
+      <h2>ARE YOU A<br/><span>TRUE FAN?</span></h2>
+      <p>Pick a show, pick your difficulty, and prove you've been paying attention.</p>
+
+      <div>
+        <p style="font-family:var(--font-m);font-size:0.8rem;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:0.75rem;">Choose a Show</p>
+        <div class="show-grid" id="showGrid">
+          <button class="show-chip" data-show="The Office">The Office</button>
+          <button class="show-chip" data-show="Seinfeld">Seinfeld</button>
+          <button class="show-chip" data-show="Friends">Friends</button>
+          <button class="show-chip" data-show="Parks and Recreation">Parks &amp; Rec</button>
+          <button class="show-chip" data-show="Arrested Development">Arrested Dev.</button>
+          <button class="show-chip" data-show="Community">Community</button>
+          <button class="show-chip" data-show="30 Rock">30 Rock</button>
+          <button class="show-chip" data-show="It's Always Sunny">It's Always Sunny</button>
+        </div>
+      </div>
+
+      <div>
+        <p style="font-family:var(--font-m);font-size:0.8rem;letter-spacing:2px;color:var(--red);text-transform:uppercase;margin-bottom:0.75rem;">Difficulty</p>
+        <div class="diff-row">
+          <button class="diff-btn active" data-diff="easy">😄 Easy</button>
+          <button class="diff-btn" data-diff="medium">🤔 Medium</button>
+          <button class="diff-btn" data-diff="hard">🔥 Hard</button>
+        </div>
+      </div>
+
+      <button class="btn-primary" id="startBtn" disabled>START TRIVIA</button>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quiz">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+      </div>
+      <div class="quiz-meta">
+        <span id="questionCounter">Question 1 / 5</span>
+        <span id="scoreCounter">Score: 0</span>
+      </div>
+      <div class="question-card">
+        <div class="question-label" id="questionShow">The Office</div>
+        <div class="question-text" id="questionText"></div>
+      </div>
+      <div class="answers-grid" id="answersGrid"></div>
+      <div class="feedback-box" id="feedbackBox"></div>
+      <button class="btn-primary" id="nextBtn" style="display:none; align-self:center;">NEXT QUESTION →</button>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div id="results">
+      <h2 id="resultsTitle">QUIZ COMPLETE!</h2>
+      <div class="score-display" id="scoreDisplay">0/5</div>
+      <div class="score-label" id="scoreLabel">questions correct</div>
+      <p class="verdict" id="verdictText"></p>
+      <div class="results-btn-row">
+        <button class="btn-primary" id="playAgainBtn">PLAY AGAIN</button>
+        <button class="btn-secondary" id="newShowBtn">NEW SHOW</button>
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <a href="scratch.html">← Sitcom Central</a> &nbsp;·&nbsp; Sitcom Trivia · Ryan Shurtliff · BYU
+  </footer>
+
+  <script>
+
+    // ── All hardcoded questions by show and difficulty ──
+    const QUESTIONS = {
+
+      "The Office": {
+        easy: [
+          { question: "What is the name of the paper company where The Office is set?", answers: ["Dunder Mifflin", "Initech", "Vandelay Industries", "Bluth Company"], correct: 0, explanation: "Dunder Mifflin is the Scranton, PA paper company where the whole show takes place." },
+          { question: "What is Michael Scott's job title?", answers: ["Regional Manager", "Assistant Manager", "Sales Director", "Branch President"], correct: 0, explanation: "Michael is the Regional Manager of the Scranton branch of Dunder Mifflin." },
+          { question: "Which character is known for saying 'That's what she said'?", answers: ["Michael Scott", "Dwight Schrute", "Jim Halpert", "Kevin Malone"], correct: 0, explanation: "Michael Scott uses 'That's what she said' as his signature catchphrase throughout the series." },
+          { question: "What does Dwight Schrute farm on his property?", answers: ["Beets", "Corn", "Potatoes", "Soybeans"], correct: 0, explanation: "Dwight owns and operates Schrute Farms, a beet farm and bed-and-breakfast." },
+          { question: "Who does Jim Halpert eventually marry?", answers: ["Pam Beesly", "Karen Filippelli", "Phyllis Vance", "Angela Martin"], correct: 0, explanation: "Jim and Pam's slow-burn romance is the emotional heart of the series — they marry in Season 6." }
+        ],
+        medium: [
+          { question: "What is the name of Dwight's bed and breakfast?", answers: ["Schrute Farms", "Beet Haven", "The Dwight Inn", "Mose's Place"], correct: 0, explanation: "Schrute Farms is Dwight's beet farm that he also operates as a bed and breakfast." },
+          { question: "What sport does Michael Scott love so much he created his own team?", answers: ["Volleyball", "Ice Hockey", "Basketball", "Soccer"], correct: 2, explanation: "Michael organizes a basketball game in Season 1 and is obsessed with the sport throughout the series." },
+          { question: "What is the name of the spin-off company Michael starts after leaving Dunder Mifflin?", answers: ["Michael Scott Paper Company", "Scott's Tots Inc.", "The Best Boss Co.", "Dundie Enterprises"], correct: 0, explanation: "Michael starts the Michael Scott Paper Company in Season 5 to compete directly with Dunder Mifflin." },
+          { question: "Which character wins the very first Dundie Award shown on screen?", answers: ["Pam Beesly", "Dwight Schrute", "Jim Halpert", "Kevin Malone"], correct: 0, explanation: "Pam wins the 'Whitest Sneakers' Dundie Award and famously gives a speech while tipsy at Chili's." },
+          { question: "What is Andy Bernard's a cappella group from Cornell called?", answers: ["Here Comes Treble", "The Note-ables", "Key Change", "The Ivy Tones"], correct: 0, explanation: "Andy constantly references Here Comes Treble, his a cappella group from Cornell University." }
+        ],
+        hard: [
+          { question: "What is the address of Schrute Farms?", answers: ["1725 Slough Avenue", "7 Finger Lakes Road", "RR 6 Box 37835, Honesdale PA", "12 Beet Drive, Scranton PA"], correct: 2, explanation: "The mailing address for Schrute Farms as listed on the Schrute Farms website shown in the show." },
+          { question: "What did Michael Scott legally change his middle name to?", answers: ["Gary", "Michael", "Scott", "Mister"], correct: 1, explanation: "Michael's full name is Michael Gary Scott — he was briefly called 'Michael' in the middle name context in a fun Season 2 callback." },
+          { question: "Which episode features the famous 'pretzel day' that Michael calls the best day of the year?", answers: ["The Merger", "Product Recall", "Initiation", "Branch Wars"], correct: 0, explanation: "Pretzel day occurs in 'The Merger' (Season 3) when Michael declares it the greatest day of the year." },
+          { question: "What is the name of Creed Bratton's actual band outside of the show?", answers: ["Creed", "The Grass Roots", "The Wild Honey", "Bratton & Co."], correct: 1, explanation: "Creed Bratton was actually a member of The Grass Roots, a real 1960s rock band." },
+          { question: "How many episodes is Ricky Gervais's David Brent character in the US version of The Office?", answers: ["0", "1", "2", "3"], correct: 2, explanation: "Ricky Gervais appears as David Brent in two episodes of the US version — 'The Seminar' and the series finale." }
+        ]
+      },
+
+      "Seinfeld": {
+        easy: [
+          { question: "What is the name of the diner where Jerry and his friends hang out?", answers: ["Monk's Cafe", "Central Perk", "Pop's Diner", "Vandelay's"], correct: 0, explanation: "Monk's Cafe is the go-to hangout for Jerry, George, Elaine, and Kramer throughout the series." },
+          { question: "What is George Costanza's father's first name?", answers: ["Frank", "Jerry", "Morty", "Lloyd"], correct: 0, explanation: "Frank Costanza, played by Jerry Stiller, is George's loud and opinionated father." },
+          { question: "What fictional holiday does Frank Costanza invent?", answers: ["Festivus", "Seinzaa", "Costanzamas", "Georgemas"], correct: 0, explanation: "Festivus — 'a holiday for the rest of us' — is Frank Costanza's secular alternative to Christmas." },
+          { question: "What is Kramer's first name?", answers: ["Cosmo", "Kenny", "Carl", "Victor"], correct: 0, explanation: "Kramer's first name, Cosmo, is kept a mystery for most of the series before being revealed in Season 6." },
+          { question: "What does George tell women his occupation is to impress them?", answers: ["Architect", "Doctor", "Lawyer", "Marine Biologist"], correct: 0, explanation: "George frequently claims to be an architect to impress people, despite having no such career." }
+        ],
+        medium: [
+          { question: "What is the name of Jerry's eccentric neighbor and mailman?", answers: ["Newman", "Puddy", "Lloyd Braun", "Bob Sacamano"], correct: 0, explanation: "Newman is Jerry's nemesis and Kramer's best friend, always plotting against Jerry." },
+          { question: "What is the name of J. Peterman's catalog that Elaine works for?", answers: ["J. Peterman Reality Tour", "The J. Peterman Company", "Peterman's Catalog", "Peterman Originals"], correct: 1, explanation: "Elaine works as a writer and later head of purchasing at The J. Peterman Company." },
+          { question: "In 'The Marine Biologist,' what does George pull out of the whale's blowhole?", answers: ["A Titleist golf ball", "A fishing hook", "A tin can", "A rubber duck"], correct: 0, explanation: "George pulls out a Titleist golf ball hit into the ocean by Kramer — one of the show's greatest payoffs." },
+          { question: "What is the name of the 'Soup Nazi'?", answers: ["Yev Kassem", "Ivan Borscht", "Al Yeganeh", "Dmitri Soupkov"], correct: 2, explanation: "The Soup Nazi is based on real New York soup chef Al Yeganeh, owner of Soup Kitchen International." },
+          { question: "What phrase do Jerry and George pitch as the concept for their TV show?", answers: ["A show about nothing", "A show about everything", "Real people, real problems", "No hugging, no learning"], correct: 0, explanation: "Jerry and George pitch NBC a 'show about nothing' — a meta joke about Seinfeld itself." }
+        ],
+        hard: [
+          { question: "What is the name of George's deceased fiancée?", answers: ["Susan Ross", "Karen Bilt", "Debbie Wyatt", "Carol Mayers"], correct: 0, explanation: "Susan Ross dies from licking toxic envelopes for their wedding invitations — George's reaction is famously cold." },
+          { question: "What is Kramer's business idea involving a coffee table book?", answers: ["A coffee table book about coffee tables", "A book that folds into a coffee table", "A coffee table shaped like a book", "A pop-up coffee table book"], correct: 0, explanation: "Kramer's idea is a coffee table book about coffee tables — Elaine's boss J. Peterman eventually publishes it." },
+          { question: "What is the name of Jerry's childhood friend who becomes a mimbo?", answers: ["Tony", "Joel Rifkin", "David Puddy", "Bob Corcoran"], correct: 0, explanation: "Tony, played by Dan Cortese, is Elaine's 'mimbo' (male bimbo) boyfriend in the episode 'The Stall.'" },
+          { question: "What is the name of the perfume George's mother wears that makes him unable to be intimate?", answers: ["Believe", "Ocean by Calvin Klein", "Chanel No. 5", "Wind Song"], correct: 0, explanation: "In 'The Fusilli Jerry,' George's mother's perfume triggers a psychological issue for George." },
+          { question: "What word does Elaine add to every sentence in her letter of recommendation?", answers: ["Breathtaking", "Magnificent", "Stunning", "Wonderful"], correct: 0, explanation: "Elaine writes 'breathtaking' throughout a recommendation letter after J. Peterman uses the word." }
+        ]
+      },
+
+      "Friends": {
+        easy: [
+          { question: "What is the name of the coffee house where the friends hang out?", answers: ["Central Perk", "The Brew", "Monk's Cafe", "Java Joe's"], correct: 0, explanation: "Central Perk is the iconic New York coffee shop where the gang spends most of their time." },
+          { question: "What are the names of Ross's two divorces before Rachel?", answers: ["Carol and Emily", "Susan and Mona", "Carol and Mona", "Emily and Julie"], correct: 0, explanation: "Ross divorces Carol (who comes out as gay) and Emily (who he accidentally calls 'Rachel' at the altar)." },
+          { question: "What is Joey's most famous catchphrase?", answers: ["How you doin'?", "Could this BE any more obvious?", "We were on a break!", "Smelly cat!"], correct: 0, explanation: "'How you doin'?' is Joey Tribbiani's signature flirtatious line used throughout the series." },
+          { question: "What is the name of Ross and Monica's parents?", answers: ["Jack and Judy", "Frank and Carol", "Bob and Linda", "Richard and Sandra"], correct: 0, explanation: "Jack and Judy Geller are Ross and Monica's overbearing but loving parents." },
+          { question: "What instrument does Phoebe play while singing at Central Perk?", answers: ["Guitar", "Ukulele", "Keyboard", "Tambourine"], correct: 0, explanation: "Phoebe plays acoustic guitar and performs original songs like 'Smelly Cat' at Central Perk." }
+        ],
+        medium: [
+          { question: "What is the name of Joey's beloved stuffed penguin?", answers: ["Hugsy", "Mr. Waddles", "Captain Beak", "Pengy"], correct: 0, explanation: "Hugsy is Joey's bedtime penguin pal — he is very protective of it and refuses to let anyone borrow it." },
+          { question: "What is Chandler Bing's job?", answers: ["Statistical analysis and data reconfiguration", "Accountant", "IT consultant", "Marketing manager"], correct: 0, explanation: "Chandler's job is famously vague — 'statistical analysis and data reconfiguration' is the running joke answer." },
+          { question: "What color are the apartment doors in the building?", answers: ["Purple", "Yellow", "Green", "Red"], correct: 0, explanation: "The iconic purple apartment doors are one of the most recognizable visual details of the show." },
+          { question: "What is the name of the actress who plays Joey's girlfriend Kate?", answers: ["Dina Spybey", "Paget Brewster", "Sarah, no last name", "Dina Meyer"], correct: 1, explanation: "Paget Brewster plays Kate Miller, the actress Joey falls for while doing a play together." },
+          { question: "What sport do Ross and Chandler play together that they call their 'thing'?", answers: ["Foosball", "Tennis", "Racquetball", "Ping pong"], correct: 0, explanation: "Foosball is Chandler and Joey's thing — they own a foosball table that becomes central to several plots." }
+        ],
+        hard: [
+          { question: "What is the name of the fake accent Rachel puts on when she meets Emily's parents?", answers: ["British", "French", "Australian", "Southern"], correct: 0, explanation: "Rachel inexplicably puts on a British accent when meeting Emily's snobbish British parents." },
+          { question: "What is the number of the apartment that Monica and Rachel live in?", answers: ["20", "19", "18", "22"], correct: 0, explanation: "Monica's apartment is number 20 — earlier episodes inconsistently showed it as 5 before being corrected." },
+          { question: "What is the name of Ross's monkey?", answers: ["Marcel", "Chester", "Bananas", "Spike"], correct: 0, explanation: "Marcel is Ross's pet capuchin monkey in Seasons 1 and 2 before being sent to a zoo." },
+          { question: "What is Phoebe's twin sister's name?", answers: ["Ursula", "Pamela", "Lydia", "Regina"], correct: 0, explanation: "Ursula Buffay is Phoebe's identical twin sister, who also appeared on Mad About You." },
+          { question: "What does Ross get for free at the Leather Ranch because his tailor liked him?", answers: ["A cowboy hat", "A free pair of pants", "A leather jacket", "Boots"], correct: 0, explanation: "Ross gets a free cowboy hat from his tailor at the Leather Ranch in 'The One with the Cop.'" }
+        ]
+      },
+
+      "Parks and Recreation": {
+        easy: [
+          { question: "What fictional town is Parks and Recreation set in?", answers: ["Pawnee, Indiana", "Eagleton, Indiana", "Springfield, Indiana", "Muncie, Indiana"], correct: 0, explanation: "Pawnee, Indiana is the quirky small town where Leslie Knope works tirelessly to make a difference." },
+          { question: "What is Leslie Knope's obsession when it comes to breakfast food?", answers: ["Waffles", "Pancakes", "Eggs Benedict", "French Toast"], correct: 0, explanation: "Leslie's love for waffles at J.J.'s Diner is one of the show's most iconic running gags." },
+          { question: "What does Ron Swanson do in his spare time that he keeps secret?", answers: ["Play jazz saxophone", "Write poetry", "Paint landscapes", "Knit"], correct: 0, explanation: "Ron is secretly Duke Silver, a smooth jazz saxophonist with a devoted fanbase." },
+          { question: "What department does Leslie Knope work in?", answers: ["Parks and Recreation", "City Planning", "Public Works", "Mayor's Office"], correct: 0, explanation: "Leslie works in the Pawnee Parks and Recreation Department — it's right there in the title." },
+          { question: "What is the name of Tom Haverford's entertainment company?", answers: ["Entertainment 720", "Tom's Empire", "Haverford Inc.", "The Tom Show"], correct: 0, explanation: "Entertainment 720 is Tom's wildly over-the-top entertainment company that he starts with Jean-Ralphio." }
+        ],
+        medium: [
+          { question: "What is the name of Pawnee's rival town?", answers: ["Eagleton", "Bloomington", "Columbus", "Fort Wayne"], correct: 0, explanation: "Eagleton is Pawnee's wealthy, snobbish neighboring town — the two are bitter rivals." },
+          { question: "What does April Ludgate study in college?", answers: ["Women's studies and Latin", "Political science", "Art history", "Philosophy"], correct: 0, explanation: "April majored in women's studies and minored in Latin — she is academically capable but deliberately apathetic." },
+          { question: "What is the name of the Sweetums candy that causes a health crisis in Pawnee?", answers: ["Nutriyum bars", "Sweetums Blast", "Sugar Rush", "Candy Corn Oreos"], correct: 0, explanation: "Nutriyum bars are the Sweetums product linked to a health controversy involving the town's sugar addiction." },
+          { question: "What is Ben Wyatt's passion project that he works on obsessively?", answers: ["A claymation Game of Thrones", "An ice town board game", "A fantasy novel", "A documentary"], correct: 1, explanation: "Ben creates Cones of Dunshire, an incredibly complex fantasy board game that becomes his passion project." },
+          { question: "What is the name of Ann Perkins's ex-boyfriend who starts the whole series?", answers: ["Andy Dwyer", "Chris Traeger", "Mark Brendanawicz", "Dave Sanderson"], correct: 0, explanation: "Andy Dwyer is Ann's deadbeat boyfriend who breaks his legs in the pit — his injury kickstarts the entire series." }
+        ],
+        hard: [
+          { question: "What is the full name of Jean-Ralphio's twin sister?", answers: ["Mona-Lisa Saperstein", "Jean-Lisa Saperstein", "Donna Saperstein", "Lisa-Jean Saperstein"], correct: 0, explanation: "Mona-Lisa Saperstein is Jean-Ralphio's equally chaotic twin sister, described as 'the worst person in the world.'" },
+          { question: "What is the name of the Pawnee town mascot?", answers: ["Turnip the Beet", "The Pawnee Porpoise", "Perd Hapley", "Lil' Sebastian"], correct: 3, explanation: "Lil' Sebastian is the beloved miniature horse who is a celebrity in Pawnee — his death devastates the whole town." },
+          { question: "What fictional country does April pretend to be from in early seasons?", answers: ["She doesn't — she's just weird", "Zoravia", "San Marcos", "Eagletonistan"], correct: 0, explanation: "April doesn't claim a fake country — she just acts bizarre and mysterious, which throws people off." },
+          { question: "What is the name of the bar that the Parks department frequents?", answers: ["The Snakehole Lounge", "The Pawnee Tavern", "Paunch Burger Bar", "The Waffle Shack"], correct: 0, explanation: "The Snakehole Lounge is the go-to bar, and Tom eventually becomes a part-owner." },
+          { question: "What is Chris Traeger's catchphrase when something impresses him?", answers: ["Literally the best thing ever", "Oh my goodness gracious", "That is incredible", "Stop it. Stop it right now."], correct: 0, explanation: "Chris uses 'literally' constantly and emphatically — 'literally the best thing I have ever experienced' is his signature." }
+        ]
+      },
+
+      "Arrested Development": {
+        easy: [
+          { question: "What is the name of the Bluth family's frozen banana stand?", answers: ["Bluth's Original Frozen Banana", "The Banana Shack", "Bluth Banana Co.", "Original Frozen Treats"], correct: 0, explanation: "Bluth's Original Frozen Banana Stand on Balboa Island is central to the show's recurring 'there's always money in the banana stand' joke." },
+          { question: "Who is the narrator of Arrested Development?", answers: ["Ron Howard", "Jeffrey Tambor", "Jason Bateman", "Mitch Hurwitz"], correct: 0, explanation: "Ron Howard narrates the entire series — and later appears as himself in Season 4." },
+          { question: "What is Tobias Fünke's dual career combination?", answers: ["Analyst and therapist", "Doctor and actor", "Lawyer and therapist", "Psychiatrist and director"], correct: 0, explanation: "Tobias is an 'analrapist' — an analyst and therapist — which leads to endless unfortunate wordplay." },
+          { question: "What does Buster Bluth lose in a seal attack?", answers: ["His hand", "His foot", "His ear", "His eye"], correct: 0, explanation: "Buster loses his left hand to a seal, fulfilling foreshadowing that runs throughout Season 2." },
+          { question: "What is George Michael's romantic interest who is also his cousin?", answers: ["Maeby Fünke", "Ann Veal", "Lindsay Bluth", "Lucille 2"], correct: 0, explanation: "George Michael's crush on his cousin Maeby is one of the show's most uncomfortable and persistent running gags." }
+        ],
+        medium: [
+          { question: "What is the name of the one-armed man hired to scare Buster?", answers: ["J. Walter Weatherman", "Steve Holt", "Johnny Bark", "Franklin Delano Bluth"], correct: 0, explanation: "J. Walter Weatherman is George Sr.'s one-armed accomplice used to teach the children 'lessons.'" },
+          { question: "What does Michael keep saying they are as a family?", answers: ["Solid as a rock", "Never torn apart", "Getting the family back together", "Staying together no matter what"], correct: 2, explanation: "Michael's constant refrain is that he's 'getting the family back together' — which never quite works out." },
+          { question: "What is the name of Gob's ventriloquist dummy?", answers: ["Franklin", "Gerald", "Jefferson", "Lincoln"], correct: 0, explanation: "Franklin Delano Bluth is Gob's African-American puppet who says wildly inappropriate things." },
+          { question: "What phrase does Gob always say after a failed magic trick?", answers: ["I've made a huge mistake", "Come on!", "And that's why you always leave a note", "Her?"], correct: 0, explanation: "'I've made a huge mistake' is Gob's signature line, used in increasingly absurd situations throughout the series." },
+          { question: "What is the Bluth family's model home development called?", answers: ["Sudden Valley", "Paradise Valley", "Bluth Estates", "The Model"], correct: 0, explanation: "Sudden Valley is the Bluth Company's stalled housing development — it eventually gets filled with sex offenders." }
+        ],
+        hard: [
+          { question: "What is the name of the Bluth Company's lawyer who is wildly incompetent?", answers: ["Barry Zuckerkorn", "Bob Loblaw", "Wayne Jarvis", "Gene Parmesan"], correct: 0, explanation: "Barry Zuckerkorn, played by Henry Winkler, is the Bluths' perpetually useless family attorney." },
+          { question: "What is the name of Ann Veal's father's religious theme park?", answers: ["Righteous Brothers", "And As It Is Such, So Also As Such Is It Unto You", "Holy Golly", "Act of God"], correct: 1, explanation: "The theme park is called 'And As It Is Such, So Also As Such Is It Unto You' — a joke about how long and confusing it is." },
+          { question: "What is the secret code phrase for the staircar?", answers: ["There's always money in the banana stand", "Her?", "Steve Holt!", "Annyong"], correct: 0, explanation: "George Sr. hides money inside the banana stand walls — 'there's always money in the banana stand' is both literal and metaphorical." },
+          { question: "What does Tobias accidentally join thinking it's an acting group?", answers: ["The Blue Man Group", "The Hair Sculptors", "The Analysts Guild", "A cult"], correct: 0, explanation: "Tobias accidentally becomes a Blue Man Group performer after painting himself blue and wandering into a rehearsal." },
+          { question: "What is Lucille Austero's nickname?", answers: ["Lucille 2", "Other Lucille", "Lucille B", "The Real Lucille"], correct: 0, explanation: "Liza Minnelli's character is called 'Lucille 2' to distinguish her from Lucille Bluth — she has a vertigo condition." }
+        ]
+      },
+
+      "Community": {
+        easy: [
+          { question: "What community college is the show set at?", answers: ["Greendale Community College", "Riverside Community College", "Jefferson Community College", "Pearce Community College"], correct: 0, explanation: "Greendale Community College in Colorado is the setting for all the show's absurd adventures." },
+          { question: "What subject does Spanish teacher Señor Chang teach?", answers: ["Spanish", "French", "Portuguese", "Italian"], correct: 0, explanation: "Señor Chang teaches Spanish — though it's later revealed he has no actual teaching credentials." },
+          { question: "What does Abed love more than anything?", answers: ["Movies and TV shows", "Video games", "Comic books", "Board games"], correct: 0, explanation: "Abed is obsessed with pop culture, movies, and TV tropes — he frequently references and reenacts them." },
+          { question: "What is the name of the study room the group uses?", answers: ["Study Room F", "Study Room A", "The Library Lounge", "Room 101"], correct: 0, explanation: "The group always meets in Study Room F, which becomes their home base throughout the series." },
+          { question: "Who is the dean of Greendale?", answers: ["Dean Pelton", "Dean Spreck", "Dean Thomas", "Dean Craig"], correct: 0, explanation: "Craig Pelton (Dean Pelton) is the well-meaning but eccentric dean who constantly sends group emails." }
+        ],
+        medium: [
+          { question: "What game does the entire school take dangerously seriously in one episode?", answers: ["Paintball", "Dungeons & Dragons", "Foosball", "Pillow fighting"], correct: 0, explanation: "The paintball episodes are fan favorites — the school descends into utter chaos over a game of assassin paintball." },
+          { question: "What is the name of Pierce Hawthorne's company?", answers: ["Hawthorne Wipes", "Pierce Industries", "Moist Towelette Co.", "Hawthorne Global"], correct: 0, explanation: "Hawthorne Wipes is Pierce's family moist towelette company — his fortune comes entirely from wet wipes." },
+          { question: "What is the name of Troy and Abed's morning show?", answers: ["Troy and Abed in the Morning", "Good Morning Greendale", "The Troy and Abed Show", "Morning with T&A"], correct: 0, explanation: "'Troy and Abed in the Morning!' is their imaginary morning talk show they perform in the apartment." },
+          { question: "What does Britta Perry study?", answers: ["Psychology", "Sociology", "Political science", "Philosophy"], correct: 0, explanation: "Britta studies psychology — she's a self-styled activist who frequently misapplies psychological concepts." },
+          { question: "What does Professor Ian Duncan teach?", answers: ["Psychology", "Anthropology", "History", "Sociology"], correct: 0, explanation: "Professor Duncan teaches psychology and is a close friend of Jeff's who constantly bends academic rules for him." }
+        ],
+        hard: [
+          { question: "What is the name of the dark timeline created in the Dungeons & Dragons episode?", answers: ["The Evil Timeline", "The Darkest Timeline", "Timeline 6", "The Bad Place"], correct: 1, explanation: "The Darkest Timeline is introduced in 'Remedial Chaos Theory' — the worst outcome when the dice lands on Troy going to get pizza." },
+          { question: "What is Magnitude's only catchphrase?", answers: ["Pop pop!", "Boom boom!", "Ka-bam!", "Zap zap!"], correct: 0, explanation: "Magnitude is a minor character whose entire personality is saying 'Pop pop!' — and somehow it always works." },
+          { question: "What does Abed direct as his film school project that impresses everyone?", answers: ["A film about his parents' relationship", "A documentary about Greendale", "A Star Wars parody", "A zombie film"], correct: 0, explanation: "Abed directs a touching film recreating his parents' first meeting — it's one of the show's most emotional moments." },
+          { question: "What is the name of the school that is Greendale's rival?", answers: ["City College", "Riverside", "Eastdale", "Pierce University"], correct: 0, explanation: "City College is Greendale's bitter rival, frequently trying to sabotage or absorb Greendale throughout the series." },
+          { question: "What conspiracy does Jeff discover about the school's history?", answers: ["Greendale was founded as a tax scam", "The school mascot was a person", "The school has no accreditation", "Dean Pelton invented the school"], correct: 0, explanation: "Greendale was originally founded as a tax shelter — a recurring dark joke about the school's questionable legitimacy." }
+        ]
+      },
+
+      "30 Rock": {
+        easy: [
+          { question: "What TV show does Liz Lemon write for?", answers: ["TGS with Tracy Jordan", "Live from New York", "The Girlie Show", "Night Live"], correct: 0, explanation: "TGS with Tracy Jordan (formerly The Girlie Show) is the sketch comedy show Liz head-writes at NBC." },
+          { question: "What building is 30 Rock set in?", answers: ["30 Rockefeller Plaza", "The Empire State Building", "1 World Trade Center", "The Chrysler Building"], correct: 0, explanation: "30 Rockefeller Plaza (30 Rock) is the real NBC headquarters in New York City where the show is set." },
+          { question: "What is Jack Donaghy's job?", answers: ["Vice President of East Coast Television", "CEO of GE", "Network President", "Head of Programming"], correct: 0, explanation: "Jack is the Vice President of East Coast Television and Microwave Oven Programming at NBC/GE." },
+          { question: "What is Liz Lemon's signature food obsession?", answers: ["Sandwiches and junk food", "Pizza", "Hot dogs", "Nachos"], correct: 0, explanation: "Liz's love of sandwiches, night cheese, and junk food is one of the show's most beloved character traits." },
+          { question: "Who plays Tracy Jordan, the unstable star of TGS?", answers: ["Tracy Morgan", "Chris Rock", "Kenan Thompson", "Jay Pharoah"], correct: 0, explanation: "Tracy Morgan plays Tracy Jordan — the character is a loose parody of Morgan himself." }
+        ],
+        medium: [
+          { question: "What is Jenna Maroney's most famous film role she constantly brags about?", answers: ["Rural Juror", "The Rural Juror", "Jenna: The Movie", "White Haven"], correct: 1, explanation: "'The Rural Juror' is Jenna's film that is impossible to understand when spoken aloud — a running gag throughout the series." },
+          { question: "What is Kenneth Parcell's job at NBC?", answers: ["Page", "Intern", "Assistant producer", "Camera operator"], correct: 0, explanation: "Kenneth is an NBC page from Stone Mountain, Georgia — his cheerful optimism and apparent immortality are recurring jokes." },
+          { question: "What is the name of Jack's on-again-off-again love interest played by Salma Hayek?", answers: ["Elisa Pedrera", "Isabella Vargas", "Carmen Diaz", "Rosa Mendez"], correct: 0, explanation: "Elisa Pedrera is Jack's devoutly Catholic girlfriend from Puerto Rico, played by Salma Hayek in Season 3." },
+          { question: "What is Jack Donaghy's mentor's name at GE?", answers: ["Don Geiss", "Hank Hooper", "Devon Banks", "Kabletown"], correct: 0, explanation: "Don Geiss is Jack's mentor and the CEO of GE who puts Jack in charge and later falls into a coma." },
+          { question: "What does Tracy Jordan claim he is in his autobiography?", answers: ["Astronaut", "President", "Rock legend", "A simple man"], correct: 0, explanation: "Tracy's autobiography is full of outrageous false claims — including that he was an astronaut." }
+        ],
+        hard: [
+          { question: "What is the name of the fictional network that buys NBC in later seasons?", answers: ["Kabletown", "Microwave Corp", "Sheinhardt Wig Company", "Peacock Network"], correct: 0, explanation: "Kabletown is the fictional cable company that acquires NBC — a parody of Comcast's real acquisition of NBC Universal." },
+          { question: "What song does Liz Lemon hum when she is happy?", answers: ["The Night Court theme", "The Cheers theme", "The Friends theme", "The Seinfeld bass riff"], correct: 0, explanation: "Liz hums the Night Court theme when she's content — a nod to creator Tina Fey's admiration of that era of NBC comedy." },
+          { question: "What is the name of Jack's mother?", answers: ["Colleen Donaghy", "Margaret Donaghy", "Patricia Donaghy", "Eileen Donaghy"], correct: 0, explanation: "Colleen Donaghy, played by Elaine Stritch, is Jack's sharp-tongued Irish-Catholic mother from Boston." },
+          { question: "What company does Devon Banks work for when trying to take down Jack?", answers: ["Google", "Walmart", "MyFace", "Verizon"], correct: 2, explanation: "Devon Banks goes to work for fictional social network MyFace (a parody of Facebook/MySpace) to scheme against Jack." },
+          { question: "What is the name of Liz Lemon's on-again boyfriend who she eventually marries?", answers: ["Criss Chros", "Floyd DeBarber", "Dennis Duffy", "Wesley Snipes"], correct: 0, explanation: "Criss Chros (James Marsden) is the fun, laid-back guy Liz eventually marries in the finale — 'I don't even know what he does.'" }
+        ]
+      },
+
+      "It's Always Sunny": {
+        easy: [
+          { question: "What is the name of the bar the gang owns?", answers: ["Paddy's Pub", "Charlie's Bar", "The Irish Rover", "Sunny's Saloon"], correct: 0, explanation: "Paddy's Pub in South Philadelphia is the gang's perpetually failing bar and the center of most schemes." },
+          { question: "What city is It's Always Sunny in Philadelphia set in?", answers: ["Philadelphia", "Pittsburgh", "New York", "Baltimore"], correct: 0, explanation: "The show is set entirely in South Philadelphia — city landmarks and the Eagles are referenced constantly." },
+          { question: "What does Charlie Kelly do at the bar?", answers: ["Janitorial work and pest control", "Bartending", "Managing", "Cooking"], correct: 0, explanation: "Charlie does 'Charlie Work' — janitorial duties, pest control, and all the tasks no one else will do." },
+          { question: "What is Frank Reynolds known for doing at the start of each scheme?", answers: ["Showing up with a wad of cash", "Arriving in a trash bag", "Bringing a gun", "Suggesting they get milk steak"], correct: 0, explanation: "Frank frequently arrives with cash to fund the gang's schemes, making him indispensable despite his chaos." },
+          { question: "Who does Dennis Reynolds think he is in terms of attractiveness?", answers: ["Extremely handsome and superior", "Average but charming", "Ruggedly masculine", "A golden god"], correct: 3, explanation: "Dennis famously declares himself 'a golden god' and has a deeply narcissistic view of his own looks and intelligence." }
+        ],
+        medium: [
+          { question: "What is the name of Charlie's love interest he obsesses over for the entire series?", answers: ["The Waitress", "Dee Reynolds", "The Lawyer", "Cricket's ex"], correct: 0, explanation: "The Waitress is never given a name — Charlie stalks and obsesses over her throughout the entire series." },
+          { question: "What sport does the gang get obsessed with in a famous episode?", answers: ["Ping pong", "Baseball", "Tennis", "Golf"], correct: 1, explanation: "The gang tries to become a little league baseball team in 'The Gang Beats Boggs' — they also attempt to drink like Wade Boggs on a plane." },
+          { question: "What is Rickety Cricket's real name?", answers: ["Matthew Mara", "David Lawrence", "Patrick Crann", "Thomas Cricket"], correct: 0, explanation: "Rickety Cricket is Matthew Mara, a former priest whose life the gang systematically destroys over the course of the series." },
+          { question: "What is the name of Mac's father who is in prison?", answers: ["Luther McDonald", "Big Mac", "Papa Mac", "Ronald McDonald Sr."], correct: 0, explanation: "Luther McDonald is Mac's incarcerated father — Mac idolizes him despite Luther showing little interest in Mac." },
+          { question: "What does Charlie claim to eat that horrifies everyone?", answers: ["Milk steak boiled over hard with jelly beans", "Cat food sandwiches", "Raw sewage", "Cheese and gasoline"], correct: 0, explanation: "'Milk steak boiled over hard, with a side of your finest jelly beans' is Charlie's absurd favorite meal." }
+        ],
+        hard: [
+          { question: "What is the name of the lawyer the gang constantly torments?", answers: ["Jack Kelly", "The Lawyer", "Dan Doyle", "Rick Swaney"], correct: 1, explanation: "The Lawyer is never named — he is a recurring victim of the gang's schemes and has come to deeply hate them." },
+          { question: "What musical does the gang perform in a famous two-part episode?", answers: ["The Nightman Cometh", "Dayman: The Musical", "Paddy's Pub: The Musical", "Charlie's Dream"], correct: 0, explanation: "'The Nightman Cometh' is Charlie's musical that he writes to propose to the Waitress — it's deeply disturbing." },
+          { question: "What is Frank Reynolds' signature weapon he carries everywhere?", answers: ["A knife", "A gun", "A baseball bat", "Nunchucks"], correct: 0, explanation: "Frank always carries a knife and frequently pulls it out in situations where it is completely unnecessary." },
+          { question: "What does Dennis claim his initials D.E.N.N.I.S. stand for?", answers: ["His system for seducing women", "His business philosophy", "His morning routine", "His fighting style"], correct: 0, explanation: "The D.E.N.N.I.S. System is Dennis's manipulative method for seducing women — Demonstrate value, Engage physically, etc." },
+          { question: "What is the name of the gang's rival bar?", answers: ["Sudz", "O'Malley's", "The Irish Pub", "Murphy's"], correct: 0, explanation: "Sudz is the gang's competition — a cleaner, more successful bar that highlights how badly run Paddy's Pub is." }
+        ]
+      }
+    };
+
+    // ── State ──
+    let selectedShow = null;
+    let selectedDiff = 'easy';
+    let questions    = [];
+    let currentQ     = 0;
+    let score        = 0;
+    let answered     = false;
+
+    // ── Element refs ──
+    const introEl   = document.getElementById('intro');
+    const quizEl    = document.getElementById('quiz');
+    const resultsEl = document.getElementById('results');
+    const startBtn  = document.getElementById('startBtn');
+    const nextBtn   = document.getElementById('nextBtn');
+
+    // ── Show chips ──
+    document.getElementById('showGrid').addEventListener('click', e => {
+      const chip = e.target.closest('.show-chip');
+      if (!chip) return;
+      document.querySelectorAll('.show-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      selectedShow = chip.dataset.show;
+      startBtn.disabled = false;
+    });
+
+    // ── Difficulty buttons ──
+    document.querySelectorAll('.diff-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedDiff = btn.dataset.diff;
+      });
+    });
+
+    // ── Start ──
+    startBtn.addEventListener('click', startQuiz);
+
+    function startQuiz() {
+      // Pull the questions for the selected show + difficulty and shuffle them
+      const pool = QUESTIONS[selectedShow][selectedDiff];
+      questions = shuffle([...pool]).slice(0, 5);
+      currentQ  = 0;
+      score     = 0;
+      showScreen('quiz');
+      renderQuestion();
+    }
+
+    // Fisher-Yates shuffle
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    // ── Render question ──
+    function renderQuestion() {
+      answered = false;
+      nextBtn.style.display = 'none';
+
+      const q     = questions[currentQ];
+      const total = questions.length;
+
+      document.getElementById('progressBar').style.width = `${(currentQ / total) * 100}%`;
+      document.getElementById('questionCounter').textContent = `Question ${currentQ + 1} / ${total}`;
+      document.getElementById('scoreCounter').textContent    = `Score: ${score}`;
+      document.getElementById('questionShow').textContent    = `📺 ${selectedShow}`;
+      document.getElementById('questionText').textContent    = q.question;
+
+      const grid = document.getElementById('answersGrid');
+      grid.innerHTML = '';
+      q.answers.forEach((ans, i) => {
+        const btn = document.createElement('button');
+        btn.className   = 'answer-btn';
+        btn.textContent = ans;
+        btn.addEventListener('click', () => selectAnswer(i));
+        grid.appendChild(btn);
+      });
+
+      const fb = document.getElementById('feedbackBox');
+      fb.className    = 'feedback-box';
+      fb.textContent  = '';
+    }
+
+    // ── Select answer ──
+    function selectAnswer(idx) {
+      if (answered) return;
+      answered = true;
+
+      const q    = questions[currentQ];
+      const btns = document.querySelectorAll('.answer-btn');
+      btns.forEach(b => b.disabled = true);
+
+      const isCorrect = idx === q.correct;
+      if (isCorrect) score++;
+
+      btns[idx].classList.add(isCorrect ? 'correct' : 'wrong');
+      btns[q.correct].classList.add('correct');
+
+      const fb = document.getElementById('feedbackBox');
+      fb.textContent = isCorrect
+        ? `✅ Correct! ${q.explanation}`
+        : `❌ Not quite. ${q.explanation}`;
+      fb.className = `feedback-box show ${isCorrect ? 'correct' : 'wrong'}`;
+
+      document.getElementById('scoreCounter').textContent = `Score: ${score}`;
+      nextBtn.style.display  = 'block';
+      nextBtn.textContent    = currentQ + 1 < questions.length ? 'NEXT QUESTION →' : 'SEE RESULTS →';
+    }
+
+    // ── Next / Results ──
+    nextBtn.addEventListener('click', () => {
+      currentQ++;
+      if (currentQ < questions.length) {
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    });
+
+    function showResults() {
+      const total = questions.length;
+      document.getElementById('progressBar').style.width    = '100%';
+      document.getElementById('scoreDisplay').textContent   = `${score}/${total}`;
+      document.getElementById('scoreLabel').textContent     = 'questions correct';
+
+      const pct = score / total;
+      let verdict, title;
+      if (pct === 1)       { title = '🏆 PERFECT SCORE!';  verdict = `Flawless. You basically ARE ${selectedShow}. Seriously impressive.`; }
+      else if (pct >= 0.8) { title = '🌟 ALMOST PERFECT';  verdict = `You know ${selectedShow} inside and out — just one or two slips.`; }
+      else if (pct >= 0.6) { title = '👍 SOLID FAN';       verdict = `A respectable showing. You know your ${selectedShow}, but there's more to discover.`; }
+      else if (pct >= 0.4) { title = '😅 CASUAL VIEWER';   verdict = `You've seen some ${selectedShow}, but it might be time for a rewatch.`; }
+      else                  { title = '📺 START WATCHING';  verdict = `${selectedShow} deserves a spot on your watchlist immediately.`; }
+
+      document.getElementById('resultsTitle').textContent = title;
+      document.getElementById('verdictText').textContent  = verdict;
+      showScreen('results');
+    }
+
+    // ── Play Again / New Show ──
+    document.getElementById('playAgainBtn').addEventListener('click', startQuiz);
+    document.getElementById('newShowBtn').addEventListener('click', () => {
+      questions = [];
+      currentQ  = 0;
+      score     = 0;
+      showScreen('intro');
+    });
+
+    // ── Screen helper ──
+    function showScreen(name) {
+      introEl.style.display   = name === 'intro'   ? 'flex' : 'none';
+      quizEl.style.display    = name === 'quiz'    ? 'flex' : 'none';
+      resultsEl.style.display = name === 'results' ? 'flex' : 'none';
+    }
+
+  </script>
+
+</body>
+</html>
